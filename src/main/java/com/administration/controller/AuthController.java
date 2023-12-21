@@ -27,11 +27,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
-@RequestMapping("/MICROADMIN/auth")
+@RequestMapping("/auth")
 @Slf4j
 @AllArgsConstructor
 @Api(tags = "Auth Controller")
@@ -96,20 +97,21 @@ public class AuthController {
     public ResponseEntity<String> validateToken(@RequestParam String token) {
         try {
             // Do logic for token validation
+            String jwt = token.substring(7);
             Algorithm algorithm = Algorithm.HMAC256(JwtVariables.SECRET);
             JWTVerifier jwtVerifier = JWT.require(algorithm).build();
-            DecodedJWT decodedJWT = jwtVerifier.verify(token);
-
+            DecodedJWT decodedJWT = jwtVerifier.verify(jwt);
+            String username = decodedJWT.getSubject();
             // Check the expiration date of the token
             Date expirationDate = decodedJWT.getExpiresAt();
             Date currentDate = new Date();
-
-            if (expirationDate != null && expirationDate.after(currentDate)) {
+            Optional<Utilisateur> utilisateur = Optional.ofNullable(utilisateurService.getUtilisateurbyLogin(username));
+            if (expirationDate != null && expirationDate.after(currentDate) && utilisateur.isPresent()) {
                 // Token is valid
-                return ResponseEntity.ok("Token is valid");
+                return ResponseEntity.ok("valid");
             } else {
                 // Token is expired
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token has expired");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UNAUTHORIZED");
             }
         } catch (JWTVerificationException e) {
             // If there's any exception during token validation, handle it here
@@ -117,7 +119,7 @@ public class AuthController {
             log.error("Error validating token: {}", e.getMessage());
 
             // Return an unauthorized response for an invalid token
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UNAUTHORIZED");
         }
     }
 
