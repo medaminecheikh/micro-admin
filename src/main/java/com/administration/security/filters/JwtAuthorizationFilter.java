@@ -32,7 +32,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         log.info("getRequestURL: {}", request.getRequestURL());
 
         logRequestParameters(request);
-        if (request.getServletPath().contains("/auth/")) {
+        if (request.getServletPath().contains("/auth/")||request.getServletPath().contains("/caisse/get/")) {
             String forwardedUrl = "http://localhost:9999" + request.getRequestURI();
             log.info("Forwarding request to microservice. URL: {}", forwardedUrl);
 

@@ -38,10 +38,9 @@ public class Encaissement implements Serializable {
     private String nTransTPE;
     private String refBordereau;
 
-    @ManyToOne
-    private Utilisateur user;
-    @ManyToOne
+
+    @Transient
     private Caisse caisse;
-    @ManyToOne
+    @Transient
     private InfoFacture facture;
 }

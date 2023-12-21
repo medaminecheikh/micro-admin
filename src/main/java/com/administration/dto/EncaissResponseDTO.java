@@ -35,7 +35,6 @@ public class EncaissResponseDTO {
     private String nTransTPE;
     private String refBordereau;
     private long totalElements;
-    private UtilisateurUpdateDTO user;
 
     private CaisseUpdateDTO caisse;
 

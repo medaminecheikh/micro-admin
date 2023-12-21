@@ -29,6 +29,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
     }
+
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
@@ -43,6 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/auth/**", // permitAll for all paths under /auth
                         "/auth/authenticate",
                         "/auth/refreshtoken",
+                        "/caisse/**",
                         "/auth-controller/loginUsingPOST",
                         "/MICROADMIN/auth-controller/loginUsingPOST").permitAll()
                 .antMatchers("/MICROADMIN/auth/authenticate").permitAll() // Allow all requests to this endpoint

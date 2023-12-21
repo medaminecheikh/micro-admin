@@ -1,5 +1,6 @@
 package com.administration.entity;
 
+import com.administration.dto.EncaissResponseDTO;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
@@ -23,6 +24,6 @@ public class Caisse implements Serializable {
     private Utilisateur login;
     @ManyToOne
     private Ett cod_ett;
-    @OneToMany(mappedBy = "caisse")
-    private List<Encaissement> encaissements;
+    @Transient
+    private List<EncaissResponseDTO> encaissements;
 }

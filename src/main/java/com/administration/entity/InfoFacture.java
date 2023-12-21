@@ -30,7 +30,7 @@ public class InfoFacture implements Serializable {
     @Temporal(TemporalType.DATE)
     private Date datCreation;
     private String periode;
-    @OneToMany(mappedBy = "facture",cascade = CascadeType.ALL,orphanRemoval = true)
+    @Transient
     private List<Encaissement> encaissements;
 
 }

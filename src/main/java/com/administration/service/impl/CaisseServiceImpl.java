@@ -3,31 +3,38 @@ package com.administration.service.impl;
 import com.administration.dto.CaisseRequestDTO;
 import com.administration.dto.CaisseResponseDTO;
 import com.administration.dto.CaisseUpdateDTO;
+import com.administration.dto.EncaissResponseDTO;
 import com.administration.entity.Caisse;
 import com.administration.entity.Ett;
 import com.administration.entity.Utilisateur;
+import com.administration.openfeign.EncaissRestController;
 import com.administration.repo.CaisseRepo;
 import com.administration.repo.EttRepo;
 import com.administration.repo.UtilisateurRepo;
 import com.administration.service.ICaisseService;
 import com.administration.service.mappers.CaisseMappers;
+import feign.FeignException;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import javax.persistence.EntityNotFoundException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
 @AllArgsConstructor
+@Slf4j
 public class CaisseServiceImpl implements ICaisseService {
 
     CaisseRepo caisseRepo;
     CaisseMappers caisseMapper;
     UtilisateurRepo utilisateurRepo;
+    EncaissRestController encaissRestController;
     EttRepo ettRepo;
 
     @Override
@@ -40,14 +47,40 @@ public class CaisseServiceImpl implements ICaisseService {
 
     @Override
     public CaisseResponseDTO getCaisse(String id) {
-        Caisse caisse = caisseRepo.findById(id).get();
-        return caisseMapper.CaisseTOCaisseResponseDTO(caisse);
+        try {
+            Caisse caisse = caisseRepo.findById(id).orElseThrow();
+            List<EncaissResponseDTO> encaissResponseDTOS = encaissRestController.getEncaissForCaisseById(id).getBody();
+            // Ensure that the encaissements list is initialized
+            if (caisse.getEncaissements() == null) {
+                caisse.setEncaissements(new ArrayList<>());
+            }
+
+            if (encaissResponseDTOS != null && !encaissResponseDTOS.isEmpty()) {
+                caisse.getEncaissements().addAll(encaissResponseDTOS);
+            }
+
+            return caisseMapper.CaisseTOCaisseResponseDTO(caisse);
+        } catch (Exception e) {
+            log.error("Error retrieving caisse for id {}: {}", id, e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public List<CaisseResponseDTO> listCaisses() {
         List<Caisse> caisses = caisseRepo.findAll();
-        return caisses.stream().map(caisse -> caisseMapper.CaisseTOCaisseResponseDTO(caisse))
+        return caisses.stream().map(caisse -> {
+                    List<EncaissResponseDTO> encaissResponseDTOS = encaissRestController.getEncaissForCaisseById(caisse.getIdCaisse()).getBody();
+                    // Ensure that the encaissements list is initialized
+                    if (caisse.getEncaissements() == null) {
+                        caisse.setEncaissements(new ArrayList<>());
+                    }
+
+                    if (encaissResponseDTOS != null && !encaissResponseDTOS.isEmpty()) {
+                        caisse.getEncaissements().addAll(encaissResponseDTOS);
+                    }
+                    return caisseMapper.CaisseTOCaisseResponseDTO(caisse);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -108,9 +141,69 @@ public class CaisseServiceImpl implements ICaisseService {
 
     @Override
     public List<CaisseResponseDTO> getCaissesByEttId(String Id) {
-        Ett ett = ettRepo.findById(Id).get();
+        Ett ett = ettRepo.findById(Id)
+                .orElseThrow(() -> new EntityNotFoundException("Ett not found with id: " + Id));
+
         List<Caisse> caisseList = ett.getCaisses();
-        return caisseList.stream().map(caisse -> caisseMapper.CaisseTOCaisseResponseDTO(caisse)).
-                collect(Collectors.toList());
+        return caisseList.stream().map(caisse -> {
+                    List<EncaissResponseDTO> encaissResponseDTOS = encaissRestController.getEncaissForCaisseById(caisse.getIdCaisse()).getBody();
+                    // Ensure that the encaissements list is initialized
+                    if (caisse.getEncaissements() == null) {
+                        caisse.setEncaissements(new ArrayList<>());
+                    }
+
+                    if (encaissResponseDTOS != null && !encaissResponseDTOS.isEmpty()) {
+                        caisse.getEncaissements().addAll(encaissResponseDTOS);
+                    }
+                    return caisseMapper.CaisseTOCaisseResponseDTO(caisse);
+                })
+                .collect(Collectors.toList());
     }
+
+    @Override
+    public CaisseResponseDTO getCaisseForEn(String id) {
+
+        try {
+            Caisse caisse = caisseRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Caisse not found with id: " + id));
+            return caisseMapper.CaisseTOCaisseResponseDTO(caisse);
+        } catch (Exception e) {
+            log.error("Error retrieving caisse for id {}: {}", id, e.getMessage());
+            throw new RuntimeException("Error retrieving caisse for id " + id + ": " + e.getMessage());
+        }
+    }
+
+    public List<EncaissResponseDTO> getEncaissForCaisse(String caisseId) {
+        try {
+            ResponseEntity<List<EncaissResponseDTO>> responseEntity = encaissRestController.getEncaissForCaisseById(caisseId);
+
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                List<EncaissResponseDTO> encaissResponseDTOS = responseEntity.getBody();
+
+                if (encaissResponseDTOS != null && !encaissResponseDTOS.isEmpty()) {
+                    return encaissResponseDTOS;
+                } else {
+                    // Handle the case where the response body is null or empty
+                    log.warn("EncaissResponseDTO list is null or empty for caisseId: {}", caisseId);
+                    return Collections.emptyList();
+                }
+            } else if (responseEntity.getStatusCode() == HttpStatus.NOT_FOUND) {
+                // Caisse not found, return an empty list
+                return Collections.emptyList();
+            } else {
+                // Handle non-successful status code
+                throw new RuntimeException("Failed to get encaissements for caisse. HTTP Status: " + responseEntity.getStatusCodeValue());
+            }
+        } catch (FeignException e) {
+            // Handle Feign client exceptions (e.g., communication errors)
+            // Log the error for debugging purposes
+            log.error("Feign client error while getting encaissements for caisse: {}", e.getMessage());
+            throw new RuntimeException("Failed to get encaissements for caisse. Error: " + e.getMessage());
+        } catch (Exception e) {
+            // Handle other exceptions
+            // Log the error for debugging purposes
+            log.error("Error getting encaissements for caisse: {}", e.getMessage());
+            throw new RuntimeException("Failed to get encaissements for caisse. Error: " + e.getMessage());
+        }
+    }
+
 }

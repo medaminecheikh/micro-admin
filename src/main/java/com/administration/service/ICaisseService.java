@@ -18,4 +18,5 @@ public interface ICaisseService {
     void deleteCaisse(String idCaisse);
     List<CaisseResponseDTO> getCaissesByEttId(String Id);
 
+    CaisseResponseDTO getCaisseForEn(String id);
 }
