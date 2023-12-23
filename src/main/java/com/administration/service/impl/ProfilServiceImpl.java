@@ -37,7 +37,6 @@ public class ProfilServiceImpl implements IProfilService {
     EttRepo ettRepo;
 
 
-
     @Override
     public ProfilResponseDTO addProfile(ProfilRequestDTO RequestDTO) {
         String profileName = RequestDTO.getNomP().toUpperCase();
@@ -45,10 +44,10 @@ public class ProfilServiceImpl implements IProfilService {
         if (existingProfileOptional!=null) {
             throw new IllegalArgumentException("Profile with the name " + profileName + " already exists.");
         }else {
-        Profil profil = profilMapper.ProfileRequestDTOProfile(RequestDTO);
-        profil.setIdProfil(UUID.randomUUID().toString());
-        profil.setNomP(profil.getNomP().toUpperCase());
-        Profil profilesave=profileRepo.save(profil);
+            Profil profil = profilMapper.ProfileRequestDTOProfile(RequestDTO);
+            profil.setIdProfil(UUID.randomUUID().toString());
+            profil.setNomP(profil.getNomP().toUpperCase());
+            Profil profilesave=profileRepo.save(profil);
             return profilMapper.ProfileTOProfileResponseDTO(profilesave);}
     }
 
@@ -116,11 +115,14 @@ public class ProfilServiceImpl implements IProfilService {
 
     @Override
     public void deleteProfile(String idProfile) {
-        Profil profil =profileRepo.findById(idProfile).get();
-        if (profil.getProfilUsers().isEmpty()&& profil.getFonctions().isEmpty()&& profil.getModel()==null)
-        {
-            profileRepo.deleteById(idProfile);
-        }else  throw new RuntimeException("This profile has associations !!");
+        Profil profil = profileRepo.findById(idProfile)
+                .orElseThrow(() -> new RuntimeException("Profile with ID " + idProfile + " not found"));
+
+        // Remove associations with Fonction
+        profil.getFonctions().clear();
+
+        profileRepo.deleteById(idProfile);
+
     }
 
     @Override
