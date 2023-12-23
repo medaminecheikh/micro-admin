@@ -28,13 +28,12 @@ public class ITracageServiceImpl implements ITracageService {
     private TracageRepo tracageRepo;
     private UtilisateurRepo utilisateurRepo;
     private TracageMapper tracageMapper;
-
     @Override
     public List<TracageResponse> getTraceByAll(String idUser, Date  time, String ip, String browser, String op) {
         List<Tracage> tracages = tracageRepo.findAll();
 
-            return tracages.stream().map(tracage -> {
-               return tracageMapper.TracageTOTracageResponseDTO(tracage);}).collect(Collectors.toList());
+        return tracages.stream().map(tracage -> {
+            return tracageMapper.TracageTOTracageResponseDTO(tracage);}).collect(Collectors.toList());
 
     }
 
