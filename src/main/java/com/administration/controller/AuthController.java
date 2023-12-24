@@ -3,7 +3,6 @@ package com.administration.controller;
 import com.administration.dto.UtilisateurResponseDTO;
 import com.administration.entity.AuthResponse;
 import com.administration.entity.Utilisateur;
-import com.administration.security.Jwt.JwtTokenUtil;
 import com.administration.security.Jwt.JwtVariables;
 import com.administration.service.IUtilisateurService;
 import com.administration.service.impl.UserDetailsServiceImpl;
@@ -12,7 +11,6 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -35,12 +33,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/auth")
 @Slf4j
 @AllArgsConstructor
-@Api(tags = "Auth Controller")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
-
-
     private final UserDetailsServiceImpl userDetailsService;
     private IUtilisateurService utilisateurService;
 

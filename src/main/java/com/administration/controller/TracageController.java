@@ -3,20 +3,16 @@ package com.administration.controller;
 import com.administration.dto.TracageResponse;
 import com.administration.entity.Tracage;
 import com.administration.service.ITracageService;
-import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
+
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
-@Api(tags = "Gestion Tracage")
 @Slf4j
 public class TracageController {
     private ITracageService tracageService;

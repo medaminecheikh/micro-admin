@@ -54,6 +54,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/MICROADMIN/v2/api-docs",
                         "/MICROADMIN/swagger-resources/**",
                         "/swagger-resources/**").permitAll()
+                .antMatchers("/actuator/**").permitAll()
                 .anyRequest().authenticated();
         http.addFilterBefore(new JwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.addFilter(new JwtAuthenticationFilter(authenticationManagerBean()));

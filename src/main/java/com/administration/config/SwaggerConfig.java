@@ -1,3 +1,4 @@
+/*
 package com.administration.config;
 import io.swagger.models.auth.In;
 import io.swagger.v3.oas.models.security.SecurityScheme;
@@ -30,8 +31,10 @@ import springfox.documentation.service.AuthorizationScope;
 
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
+@EnableSwagger2
 public class SwaggerConfig {
 
     @Bean
@@ -56,14 +59,14 @@ public class SwaggerConfig {
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
                 .build()
-                .securitySchemes(Arrays.asList(new ApiKey("JWT", HttpHeaders.AUTHORIZATION, In.HEADER.name())))
+                .securitySchemes(List.of(new ApiKey("JWT", HttpHeaders.AUTHORIZATION, In.HEADER.name())))
                 .securityContexts(Arrays.asList(securityContext()))
                 .apiInfo(apiInfo());
     }
 
     private SecurityContext securityContext() {
         return SecurityContext.builder()
-                .securityReferences(Arrays.asList(new SecurityReference("JWT", new AuthorizationScope[0])))
+                .securityReferences(List.of(new SecurityReference("JWT", new AuthorizationScope[0])))
                 .build();
     }
     private ApiInfo apiInfo () {
@@ -75,3 +78,4 @@ public class SwaggerConfig {
     }
     //http://localhost:8088/swagger-ui/index.html
 }
+*/
