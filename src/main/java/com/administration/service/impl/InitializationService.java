@@ -70,11 +70,11 @@ public class InitializationService {
     public static List<ZoneRequestDTO> generateDummyZones() {
         List<ZoneRequestDTO> zones = new ArrayList<>();
 
-        zones.add(new ZoneRequestDTO("Z1", "Z1", "Tunis", "منطقة تونس"));
-        zones.add(new ZoneRequestDTO("Z2", "Z2", "Sousse", "منطقة سوسة"));
-        zones.add(new ZoneRequestDTO("Z3", "Z3", "Sfax", "منطقة صفاقس"));
-        zones.add(new ZoneRequestDTO("Z4", "Z4", "Bizerte", "منطقة بنزرت"));
-        zones.add(new ZoneRequestDTO("Z5", "Z5", "Gabes", "منطقة قابس"));
+        zones.add(new ZoneRequestDTO("Z1", "Tunis", "Tunis", "منطقة تونس"));
+        zones.add(new ZoneRequestDTO("Z2", "Sousse", "Sousse", "منطقة سوسة"));
+        zones.add(new ZoneRequestDTO("Z3", "Sfax", "Sfax", "منطقة صفاقس"));
+        zones.add(new ZoneRequestDTO("Z4", "Bizerte", "Bizerte", "منطقة بنزرت"));
+        zones.add(new ZoneRequestDTO("Z5", "Gabes", "Gabes", "منطقة قابس"));
 
         return zones;
     }
@@ -82,11 +82,11 @@ public class InitializationService {
     public static List<DregionalRequestDTO> generateDummyDregionals() {
         List<DregionalRequestDTO> dregionals = new ArrayList<>();
 
-        dregionals.add(new DregionalRequestDTO("D1", "DR1", "TUN-DR1", "المديرية الجهوية 1"));
-        dregionals.add(new DregionalRequestDTO("D2", "DR2", "TUN-DR2", "المديرية الجهوية 2"));
-        dregionals.add(new DregionalRequestDTO("D3", "DR3", "TUN-DR3", "المديرية الجهوية 3"));
-        dregionals.add(new DregionalRequestDTO("D4", "DR4", "TUN-DR4", "المديرية الجهوية 4"));
-        dregionals.add(new DregionalRequestDTO("D5", "DR5", "TUN-DR5", "المديرية الجهوية 5"));
+        dregionals.add(new DregionalRequestDTO("D1", "Ariana", "TUN-DR1", "المديرية الجهوية 1"));
+        dregionals.add(new DregionalRequestDTO("D2", "Sousse-DR1", "Sousse-DR1", "المديرية الجهوية 2"));
+        dregionals.add(new DregionalRequestDTO("D3", "Beb Bhar", "Beb Bhar", "المديرية الجهوية 3"));
+        dregionals.add(new DregionalRequestDTO("D4", "Bizerte-Nord", "Bizerte-Nord", "المديرية الجهوية 4"));
+        dregionals.add(new DregionalRequestDTO("D5", "Gabes-City", "Gabes-City", "المديرية الجهوية 5"));
 
         return dregionals;
     }
@@ -94,11 +94,11 @@ public class InitializationService {
     public static List<EttRequestDTO> generateDummyEtts() {
         List<EttRequestDTO> etts = new ArrayList<>();
 
-        etts.add(new EttRequestDTO("E1", "Ett1 SRC", "TUN-CFRX1", "SRC1", "Tunis", 1));
-        etts.add(new EttRequestDTO("E2", "Ett2 SRC", "TUN-CFRX2", "SRC2", "Sousse", 1));
-        etts.add(new EttRequestDTO("E3", "Ett3 SRC", "TUN-CFRX3", "SRC3", "Sfax", 1));
-        etts.add(new EttRequestDTO("E4", "Ett4 SRC", "TUN-CFRX4", "SRC4", "Bizerte", 1));
-        etts.add(new EttRequestDTO("E5", "Ett5 SRC", "TUN-CFRX5", "SRC5", "Gabes", 1));
+        etts.add(new EttRequestDTO("E1", "Ett1 SRC", "TUN-CFRX1", "SRC1", "Espace Tunis", 1));
+        etts.add(new EttRequestDTO("E2", "Ett2 SRC", "TUN-CFRX2", "SRC2", "Espace Sousse", 1));
+        etts.add(new EttRequestDTO("E3", "Ett3 SRC", "TUN-CFRX3", "SRC3", "Espace Sfax", 1));
+        etts.add(new EttRequestDTO("E4", "Ett4 SRC", "TUN-CFRX4", "SRC4", "Espace Bizerte", 1));
+        etts.add(new EttRequestDTO("E5", "Ett5 SRC", "TUN-CFRX5", "SRC5", "Espace Gabes", 1));
 
         return etts;
     }
@@ -136,35 +136,35 @@ public class InitializationService {
                 // Save the manually created Zone entity
                 zoneService.addZone(zoneDto);
 
-                // Check and create Dregional if not exists
-                if (dregService.getDregional(dregionalDto.getIdDr()) == null) {
-                    log.info("Create DR: {}", dregionalDto);
-                    // Save the manually created Dregional entity
-                    dregService.addDreg(dregionalDto);
-                    if (ettService.getEtt(ettDto.getIdEtt()) == null) {
-                        log.info("Create ETT : {}", ettDto);
-                        // Save the manually created Ett entity
-                        try {
-                            ettService.addEtt(ettDto);
-                            ettService.affecterEttToDreg(ettDto.getIdEtt(),dregionalDto.getIdDr());
-                        } catch (Exception e) {
-                            log.error(e.getMessage());
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }
-
-                // Associate the DR with the Zone
+            }
+            // Check and create Dregional if not exists
+            if (dregService.getDregional(dregionalDto.getIdDr()) == null) {
+                log.info("Create DR: {}", dregionalDto);
+                // Save the manually created Dregional entity
                 try {
+                    dregService.addDreg(dregionalDto);
                     zoneService.affecterDregToZone(dregionalDto.getIdDr(), zoneDto.getIdZone());
                 } catch (Exception e) {
                     log.error(e.getMessage());
                     throw new RuntimeException(e);
                 }
+
             }
+            if (ettService.getEtt(ettDto.getIdEtt()) == null) {
+                log.info("Create ETT : {}", ettDto);
+                // Save the manually created Ett entity
+                try {
+                    ettService.addEtt(ettDto);
+                    ettService.affecterEttToDreg(ettDto.getIdEtt(), dregionalDto.getIdDr());
+
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                    throw new RuntimeException(e);
+                }
+            }
+
+
         }
-
     }
+
 }
-
-
