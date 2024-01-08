@@ -103,6 +103,7 @@ public class AuthController {
             Optional<Utilisateur> utilisateur = Optional.ofNullable(utilisateurService.getUtilisateurbyLogin(username));
             if (expirationDate != null && expirationDate.after(currentDate) && utilisateur.isPresent()) {
                 // Token is valid
+                log.info("Request Auth valid");
                 return ResponseEntity.ok("valid");
             } else {
                 // Token is expired
